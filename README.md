@@ -28,7 +28,7 @@ _To remove all installed QoS Policy_
 
 ## Demo Video
 
-Youtube EDR-Redir V1: [https://www.youtube.com/watch?v=2_tanx7RSUw](https://www.youtube.com/watch?v=2_tanx7RSUw)
+Youtube EDRChoker: [https://youtu.be/hj05mT-45bo](https://youtu.be/hj05mT-45bo)
 
 
 ## 🐦 Enjoying my work? Support the journey by following me on X
