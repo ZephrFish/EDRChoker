@@ -12,6 +12,10 @@ EDRChoker relies on Windows' **pacer.sys** driver.
 
 _To create QoS Policy for all process name in ListFile - Each line per process_
 
+**EDRChoker.exe**
+
+_To remove all installed QoS Policy_
+
 ## Links
 
 [EDRChoker: Choking The Telemetry Stream to Bypass Defenses](https://www.zerosalarium.com/2026/06/edrchoker-choking-telemetry-stream-block-edr.html)
