@@ -1,6 +1,8 @@
 # EDRChoker BOF
 
-Beacon Object File port of [EDRChoker](https://github.com/TwoSevenOneT/EDRChoker). Throttles EDR/AV process network to 8 bytes/sec in-process via WMI QoS policy — no child process, no powershell, no netsh.
+Beacon Object File port of [EDRChoker](https://github.com/TwoSevenOneT/EDRChoker). Throttles EDR/AV process network to 8 bytes/sec in-process via WMI QoS policy, result being no child process, no powershell, no netsh.
+
+Only caveat being that you need to be in an elevated process for this to work.
 
 ## How it works
 
@@ -22,8 +24,6 @@ cd bof/
 make          # builds both edrchoker.o (x64) and edrchoker.x86.o (x86)
 ```
 
-Object files are gitignored — compile before loading.
-
 ## Usage (Cobalt Strike)
 
 Load `edrchoker.cna` via Script Manager. The script auto-selects the correct arch object file based on the beacon.
@@ -39,7 +39,7 @@ edrchoker
 
 ## Notes
 
-- Policies are tagged `Owner = 1` so cleanup is surgical — system QoS defaults are untouched
+- Policies are tagged `Owner = 1` so cleanup is surgical; system QoS defaults are untouched
 - Policies survive reboot; run `edrchoker` (no args) to clean up before ending the engagement
-- WMI activity is logged to `Microsoft-Windows-WMI-Activity/Operational` — account for this in your OPSEC planning
+- WMI activity is logged to `Microsoft-Windows-WMI-Activity/Operational` - account for this in your OPSEC planning
 - Some EDR products route telemetry via kernel-mode miniport drivers that sit below the QoS layer; validate against your specific target before relying on this technique
